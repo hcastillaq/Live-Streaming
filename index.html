@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Live Streaming</title>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.2/p5.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.2/addons/p5.dom.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.js"></script>
+
+	<style>
+		img{
+			width: 320px !important;
+			height: 240px !important;
+		}
+	</style>
+</head>
+<body>
+	<script>
+		var socket = io.connect('http://' + document.domain + ':'+ location.port);
+		var video;
+		var id;
+		
+		socket.on('createUsuarios', function(usr){
+			$('body').remove('img');
+			$.each(usr, function(index, val) {
+				 if (val != id) {
+				 	$('body').append('<img id='+val+'>');
+				 }
+			});
+		});
+
+		socket.on('myId', function(myId){
+			id = myId;
+		});
+
+		socket.on('updateImage', function(data){
+			$('img[id='+data.id+']').attr('src',data.captura)
+		});
+
+		var points = [];
+
+		function setup() {
+			c = createCanvas(320, 240);
+			video = createCapture(VIDEO);
+			video.size(320, 240);
+			video.hide();
+			noStroke();
+		}
+
+		function draw(){
+			image(video, 0, 0, 320, 240);
+			
+			if (mouseIsPressed){
+				points.push({x:mouseX, y:mouseY})
+			}
+			fill("red");
+			$.each(points, function(index, val) {
+				ellipse(val.x, val.y, 5,5);
+			});
+
+			if (frameRate() > 55  && id != null) {
+				socket.emit('updateImage',{id:id, captura:c.canvas.toDataURL()});
+			}
+			
+		}
+	</script>
+</body>
+</html>
