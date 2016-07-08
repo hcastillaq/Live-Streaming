@@ -23,7 +23,7 @@
 		var id;
 		
 		socket.on('createUsuarios', function(usr){
-			$('body').remove('img');
+			$('img').remove();
 			$.each(usr, function(index, val) {
 				 if (val != id) {
 				 	$('body').append('<img id='+val+'>');
